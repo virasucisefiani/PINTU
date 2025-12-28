@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pintu</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 10px;
+    }
+
+    .header img {
+      height: 60px;
+    }
+
+    .header a {
+      color: #007bff;
+      font-weight: 500;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    /* Area video */
+    .hero {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background: #f9f9f9;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* biar full layar */
+      max-height: 80vh;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    video.loaded {
+      opacity: 1;
+    }
+
+    /* Tombol masuk */
+    .btn {
+      width: 85%;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.3s;
+      background: #fff;
+      border: 1.5px solid #007bff;
+      color: #007bff;
+      margin-bottom: 30px;
+    }
+
+    .btn:hover {
+      background: #007bff;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Bagian atas -->
+  <div class="header">
+    <img src="pintu_thumbnail_card_6a039be9aa.png" alt="Logo Pintu">
+    <a href="#">Jelajahi Dulu</a>
+  </div>
+
+  <!-- Bagian tengah (video) -->
+  <div class="hero">
+    <!-- Ganti nama video dan gambar poster sesuai file kamu -->
+    <video
+      src="lv_0_20251024024936.mp4" 
+      autoplay 
+      muted 
+      loop 
+      playsinline 
+      preload="auto" 
+      poster="poster.jpg">
+    </video>
+  </div>
+
+  <!-- Tombol bawah -->
+  <button class="btn" onclick="window.location.href='login.html'">Masuk</button>
+
+  <script>
+    // Biar video fade-in halus saat sudah siap diputar
+    const vid = document.querySelector('video');
+    vid.addEventListener('loadeddata', () => {
+      vid.classList.add('loaded');
+    });
+  </script>
+
+</body>
+</html>
